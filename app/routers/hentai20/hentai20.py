@@ -1,12 +1,13 @@
 from typing import Any, Dict, List, Union, Optional
 from bs4 import BeautifulSoup
+from requests import auth
 from app.handlers.api_handler import ApiHandler
 from app.resources.errors import CRASH
 import requests
 
 api = ApiHandler("https://hentai20.io")
 
-async def get_panels(*, chapter_id: str) -> Union[Dict[str, Any], int]:
+async def get_panels(chapter_id: str) -> Union[Dict[str, Any], int]:
     response: Any = await api.get(endpoint=f"/{chapter_id}",  html=True)
     
     if type(response) is int:
@@ -29,6 +30,60 @@ async def get_panels(*, chapter_id: str) -> Union[Dict[str, Any], int]:
         "chapter_title": chapter_title,
         "panels": panels,
     }
+
+# title, image_url, description, author, created_date, update__date, views, chapters
+async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
+    response: Any = await api.get(endpoint=f"/manga/{manga_id}", html=True)
+
+    if type(response) is int:
+        return CRASH
+
+    soup: BeautifulSoup = get_soup(response)
+    image_ele = soup.select('.attachment-.size-.wp-post-image')[0]
+    title = image_ele.get("alt")
+    image_url = image_ele.get('src')
+    description = soup.select('.entry-content.entry-content-single > p')[0].text.strip()
+    chapter_eles = soup.select('.eph-num > a')
+
+    ticks = {}
+    tick_eles = soup.select(".imptdt")
+
+    for tick in tick_eles:
+        tick_type = tick.text.replace("Posted On", "created_at").replace("Updated On", "updated_at").split(" ")[0].lower().strip()
+
+        if tick_type == "type":
+            ticks["type"] = tick.select("a")[0].text 
+
+        if tick_type in [ "updated_at", "created_at", "author" ]:
+            ticks[tick_type] = tick.select("i")[0].text 
+
+    chapters: List[Dict[str, str]] = []
+
+    for i in range(1, len(chapter_eles)): #! skipping the first element
+        chapter_ele = chapter_eles[i]
+        href: Any = chapter_ele.get("href") 
+        name: Any = chapter_ele.select(".chapternum")[0].text
+        _date: Any = chapter_ele.select(".chapterdate")[0].text
+        chapter_id = href.replace("https://hentai20.io/", "")
+        
+        chapters.append({
+            "name": name,
+            "chapter_id": chapter_id,
+            "date": _date,
+        })
+
+    return {
+        "manga": {
+            "manga_id": manga_id,
+            "image_url": image_url,
+            "title": title,
+            **ticks,
+            "description": description,
+            "chapters": chapters,
+        }
+    }
+
+
 
 
 def get_soup(html) -> BeautifulSoup:
