@@ -23,9 +23,6 @@ def proxy(image_url: Optional[str] = None):
 
      return StreamingResponse(iter([image_bytes]), media_type="image/jpeg")
 
-# https://hentai20.io/manga/?genre%5B%5D=1655&status=ongoing&type=manhwa&order=update
-# https://hentai20.io/manga/?genre[]=1655&status=ongoing&type=manhwa&order=update
-# TODO: add the filtering 
 @router.get("/filter")
 async def filter_mangas(
      page: str = "1", 

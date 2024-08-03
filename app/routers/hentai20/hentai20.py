@@ -42,9 +42,10 @@ async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
     title = image_ele.get("alt")
     image_url = image_ele.get('src')
     description = soup.select('.entry-content.entry-content-single > p')[0].text.strip()
+    score = soup.select('.num')[0].text.strip()
     chapter_eles = soup.select('.eph-num > a')
 
-    ticks = {}
+    ticks = { "score": score }
     tick_eles = soup.select(".imptdt")
 
     for tick in tick_eles:
@@ -70,8 +71,6 @@ async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
             "chapter_id": chapter_id,
             "date": _date,
         })
-
-    # TODO: add rating score
 
     return {
         "manga": {
