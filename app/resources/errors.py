@@ -1,0 +1,10 @@
+SUCCESSFUL_MSG: str = "sucessful"
+NOT_FOUND_MSG: str = "not found"
+FORBIDDEN_MSG: str = "request forbidden"
+CRASH_MSG: str = "unexpected issue"
+BAD_REQUEST_MSG: str = "invalid request"
+SUCCESSFUL:int = 200
+NOT_FOUND:int = 404
+FORBIDDEN:int = 403
+CRASH:int = 503
+BAD_REQUEST:int = 400
