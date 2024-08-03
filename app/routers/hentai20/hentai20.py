@@ -85,8 +85,9 @@ async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
     }
 
 
-async def get_filter_mangas(**kwargs) -> Union[Dict[str, Any], int]:
-    response: Any = await api.get(**kwargs,  html=True)
+async def get_filter_mangas(params: Dict[str, str], **kwargs) -> Union[Dict[str, Any], int]:
+    response: Any = await api.get(**kwargs, params=params, html=True)
+    page = params["page"]
 
     if type(response) is int:
         return CRASH
@@ -94,8 +95,6 @@ async def get_filter_mangas(**kwargs) -> Union[Dict[str, Any], int]:
     soup: BeautifulSoup = get_soup(response)
     mangas: List[Dict[str, Any]] = []
     items: List = soup.select('.listupd .bsx > a')
-
-    print(items)
 
     for manga in items:
         image_url = manga.select("img")[0].get("src")
@@ -119,6 +118,9 @@ async def get_filter_mangas(**kwargs) -> Union[Dict[str, Any], int]:
 
     return {
         "mangas": mangas,
+        "pagination": {
+            "page": page,
+        }
     }
 
 

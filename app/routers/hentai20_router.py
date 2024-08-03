@@ -23,6 +23,8 @@ def proxy(image_url: Optional[str] = None):
 
      return StreamingResponse(iter([image_bytes]), media_type="image/jpeg")
 
+# https://hentai20.io/manga/?genre%5B%5D=1655&status=ongoing&type=manhwa&order=update
+# https://hentai20.io/manga/?genre[]=1655&status=ongoing&type=manhwa&order=update
 # TODO: add the filtering 
 @router.get("/filter")
 async def filter_mangas(
@@ -32,21 +34,29 @@ async def filter_mangas(
      _type: Optional[str] = None, 
      sort: Optional[str] = None, 
      ) -> JSONResponse:
-     params = {}
+     params = {
+          "page": page
+     }
      
      if status:
-          params["state"] = status
+          params["status"] = status
 
      if _type:
           params["type"] = _type
 
+     if sort:
+          params["order"] = sort
+
+     if genre:
+          params["genre[]"] = genre
+
 
      data: Union[Dict[str, Any], int] = await get_filter_mangas(endpoint=f"/manga/", params=params)
      
-     if data == CRASH:
+     if data == CRASH or type(data) is int:
           return response.bad_request_response()
 
-     return response.successful_response({"data": data })
+     return response.successful_response({ "data": data })
 
 
 @router.get("/{manga_id}")
