@@ -31,7 +31,6 @@ async def get_panels(chapter_id: str) -> Union[Dict[str, Any], int]:
         "panels": panels,
     }
 
-# title, image_url, description, author, created_date, update__date, views, chapters
 async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
     response: Any = await api.get(endpoint=f"/manga/{manga_id}", html=True)
 

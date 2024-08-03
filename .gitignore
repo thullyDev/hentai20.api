@@ -1,0 +1,11 @@
+todo.txt
+notes.txt
+temp.txt
+env
+app/tests/*
+scripts
+*.env
+*.log
+**/__pycache__/
+*.pyc
+*.py[cod]
