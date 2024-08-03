@@ -7,6 +7,7 @@ from app.routers.hentai20.hentai20 import (
      get_panels,
      get_manga,
      download_image_from_url,
+     get_filter_mangas
 )
 from fastapi.responses import FileResponse, StreamingResponse
 
@@ -21,6 +22,31 @@ def proxy(image_url: Optional[str] = None):
           return FileResponse("media/error.gif", media_type="image/gif")
 
      return StreamingResponse(iter([image_bytes]), media_type="image/jpeg")
+
+# TODO: add the filtering 
+@router.get("/filter")
+async def filter_mangas(
+     page: str = "1", 
+     genre: Optional[str] = None, 
+     status: Optional[str] = None, 
+     _type: Optional[str] = None, 
+     sort: Optional[str] = None, 
+     ) -> JSONResponse:
+     params = {}
+     
+     if status:
+          params["state"] = status
+
+     if _type:
+          params["type"] = _type
+
+
+     data: Union[Dict[str, Any], int] = await get_filter_mangas(endpoint=f"/manga/", params=params)
+     
+     if data == CRASH:
+          return response.bad_request_response()
+
+     return response.successful_response({"data": data })
 
 
 @router.get("/{manga_id}")

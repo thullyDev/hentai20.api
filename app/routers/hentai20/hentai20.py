@@ -71,6 +71,8 @@ async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
             "date": _date,
         })
 
+    # TODO: add rating score
+
     return {
         "manga": {
             "manga_id": manga_id,
@@ -83,6 +85,41 @@ async def get_manga(manga_id) -> Union[Dict[str, Any], int]:
     }
 
 
+async def get_filter_mangas(**kwargs) -> Union[Dict[str, Any], int]:
+    response: Any = await api.get(**kwargs,  html=True)
+
+    if type(response) is int:
+        return CRASH
+
+    soup: BeautifulSoup = get_soup(response)
+    mangas: List[Dict[str, Any]] = []
+    items: List = soup.select('.listupd .bsx > a')
+
+    print(items)
+
+    for manga in items:
+        image_url = manga.select("img")[0].get("src")
+        title = manga.get("title")
+        href_chunks = manga.get("href").split("/")
+        chunks_length = len(href_chunks)
+        slug = href_chunks[chunks_length - 2]
+        colored_ele = manga.select(".colored")
+        colored = True if colored_ele else False
+        latest_chapter = manga.select(".epxs")[0].text
+        score = manga.select(".numscore")[0].text
+
+        mangas.append({
+            "title": title,
+            "image_url": image_url,
+            "colored": colored, 
+            "slug": slug,
+            "latest_chapter": latest_chapter,
+            "score": score, 
+        })
+
+    return {
+        "mangas": mangas,
+    }
 
 
 def get_soup(html) -> BeautifulSoup:
